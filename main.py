@@ -8,7 +8,7 @@ TWELVE_API_KEY = "354c41fa243c4677a4491f35884d1fcb"
 BOT_URL = os.getenv("BOT_URL")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("¿En qué puedo servirle, Señor?")
+    await update.message.reply_text("¿En qué puedo servirle, señor?")
 
 def get_price(symbol, source="coingecko"):
     try:
