@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: jarvis-bot
+    runtime: python
+    buildCommand: ""
+    startCommand: "python main.py"
+    envVars:
+      - key: TELEGRAM_TOKEN
+        value: 7923861978:AAGWrEPgItrlkzBtmYmIXdbKNdNJVb4UPBw
