@@ -5,6 +5,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TWELVE_API_KEY = "354c41fa243c4677a4491f35884d1fcb"
+BOT_URL = os.getenv("BOT_URL")  # <--- IMPORTANTE PARA WEBHOOK
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -19,7 +20,8 @@ def get_price(symbol, source="coingecko"):
     elif source == "twelvedata":
         url = f"https://api.twelvedata.com/price?symbol={symbol}&apikey={TWELVE_API_KEY}"
         r = requests.get(url)
-        return r.json().get("price", "❌ No encontrado")
+        data = r.json()
+        return data.get("price", data.get("message", "❌ No encontrado"))
     return "❌ Fuente no válida"
 
 async def precio(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -37,7 +39,7 @@ async def precio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         precio = get_price("XAU/USD", source="twelvedata")
         await update.message.reply_text(f"🪙 Oro: ${precio}")
     elif activo == "nasdaq":
-        precio = get_price("IXIC", source="twelvedata")
+        precio = get_price("^IXIC", source="twelvedata")
         await update.message.reply_text(f"📈 Nasdaq: ${precio}")
     elif activo == "eurusd":
         precio = get_price("EUR/USD", source="twelvedata")
@@ -49,7 +51,15 @@ async def precio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Activo no reconocido, señor.")
 
 if __name__ == "__main__":
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    from telegram.ext import Application
+
+    app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("precio", precio))
-    app.run_polling()
+
+    port = int(os.environ.get("PORT", 8443))
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=port,
+        webhook_url=f"{BOT_URL}/",
+    )
